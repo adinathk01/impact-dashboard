@@ -89,7 +89,7 @@ else:
     #             st.sidebar.error("Invalid JSON pasted.")
     if sheet_url:
         try:
-            df = load_sheet(sheet_url, creds_json=creds_json)
+            df = load_sheet(sheet_url, creds_json=None)
         except Exception as e:
             st.sidebar.error(f"Failed to load sheet: {e}")
             df = pd.DataFrame()
