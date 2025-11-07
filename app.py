@@ -3,6 +3,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
+from google.oauth2 import service_account
 import datetime
 import os
 import json
@@ -77,15 +78,15 @@ if data_source == "Upload CSV (local)":
 else:
     st.sidebar.info("To use Google Sheets, share the sheet with the service account email (see README).")
     sheet_url = st.sidebar.text_input("Google Sheet URL or Key", value="")
-    use_secret = st.sidebar.checkbox("Provide service account JSON in secrets (advanced)")
-    creds_json = None
-    if use_secret:
-        secret_key = st.sidebar.text_area("Paste service account JSON here (or store in Streamlit secrets)")
-        if secret_key:
-            try:
-                creds_json = json.loads(secret_key)
-            except Exception as e:
-                st.sidebar.error("Invalid JSON pasted.")
+    # use_secret = st.sidebar.checkbox("Provide service account JSON in secrets (advanced)")
+    # creds_json = None
+    # if use_secret:
+    #     secret_key = st.sidebar.text_area("Paste service account JSON here (or store in Streamlit secrets)")
+    #     if secret_key:
+    #         try:
+    #             creds_json = json.loads(secret_key)
+    #         except Exception as e:
+    #             st.sidebar.error("Invalid JSON pasted.")
     if sheet_url:
         try:
             df = load_sheet(sheet_url, creds_json=creds_json)
