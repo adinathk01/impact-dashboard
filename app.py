@@ -37,25 +37,33 @@ def load_csv(path):
 
 @st.cache_data(ttl=600)
 def load_sheet(sheet_url, creds_json=None):
-    if gspread is None:
-        st.error("gspread is not installed. Please install dependencies (see README).")
-        return pd.DataFrame()
-    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-    if creds_json:
-        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_json, scope)
-    else:
-        # expect a file named service_account.json in working directory
-        creds = ServiceAccountCredentials.from_json_keyfile_name('service_account.json', scope)
-    client = gspread.authorize(creds)
-    # sheet_url may be a full URL or a sheet key
-    try:
-        sh = client.open_by_url(sheet_url)
-    except Exception:
-        sh = client.open_by_key(sheet_url)
-    worksheet = sh.sheet1
-    data = worksheet.get_all_records()
-    return pd.DataFrame(data)
+# Create credentials from Streamlit Secrets
+    creds = service_account.Credentials.from_service_account_info(
+        st.secrets["gcp_service_account"],
+        scopes=[
+            "https://www.googleapis.com/auth/spreadsheets",
+            "https://www.googleapis.com/auth/drive"
+        ]
+    )
 
+    # Authorize Google Sheets access
+    client = gspread.authorize(creds)
+
+    # Open the sheet by URL
+    sheet = client.open_by_url(sheet_url).sheet1
+    # sheet = "https://docs.google.com/spreadsheets/d/1pwHqqpEwYKZ0XkQeZ7rGW7Zm4bDperGhRr9ImYiSkAU/edit?usp=sharing"
+
+    # Fetch all records into a DataFrame
+    data = sheet.get_all_records()
+
+    # Convert to pandas DataFrame
+    df = pd.DataFrame(data)
+
+    # Optional: clean column names
+    df.columns = df.columns.str.strip().str.replace(" ", "_").str.lower()
+
+    return df
+    
 df = pd.DataFrame()
 
 if data_source == "Upload CSV (local)":
